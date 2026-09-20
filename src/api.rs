@@ -74,7 +74,9 @@ async fn hid_upgrade(
         tracing::warn!("Rejected native HID WebSocket without an Origin header");
         return Err(StatusCode::FORBIDDEN);
     };
-    if !allowed_origins.contains(origin) {
+    let is_cloudflared = origin.ends_with(".trycloudflare.com");
+    let is_local_lan = origin.starts_with("http://192.168.") || origin.starts_with("http://10.");
+    if !allowed_origins.contains(origin) && !is_cloudflared && !is_local_lan {
         tracing::warn!(%origin, "Rejected native HID WebSocket from an unapproved origin");
         return Err(StatusCode::FORBIDDEN);
     }
